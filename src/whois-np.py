@@ -79,23 +79,24 @@ def load_config():
 
 
 def main(domainName):
+    domainSplit = domainName.split('.')
     session_req = requests.Session()
     web_data = session_req.get(whois_domain_url)
     web_soup = BeautifulSoup(web_data.text,'html.parser')
 
     _token = web_soup.find("input",{"name":"_token"})['value']
     _action = web_soup.find("form")['action']
-    form_data = dict(domainName='swornimshrestha',domainExtension='.com.np',_token=_token)
+
+    form_data = dict(domainName=domainSplit[0],domainExtension='.'+domainSplit[1]+'.'+domainSplit[2],_token=_token)
     whois_detail = requests.post(_action,data=form_data, headers=dict(Referrer=whois_domain_url),cookies=dict(web_data.cookies))
 
     whois_soup = BeautifulSoup(whois_detail.text,'html.parser')
-
     check = whois_soup.find(class_="available")
 
     if(check):
         available()
-
-
+    else:
+        display_details(whois_soup)
 
 if __name__ =="__main__":
     whois_domain_url= load_config()
